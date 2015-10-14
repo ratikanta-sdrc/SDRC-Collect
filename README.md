@@ -1,4 +1,4 @@
 # SDRC-Collect
 SDRC collect.
 
-SDRCCollectSM folder contains the project.
+ SDRCCollectSM folder contains the project.
