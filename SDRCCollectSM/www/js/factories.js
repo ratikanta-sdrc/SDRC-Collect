@@ -6,62 +6,6 @@ todoApp.factory('todoFactory', function ($http) {
     	// return $http.get("http://opendatakit.appspot.com/formList");
         return $http.get(url);
         //http://203.129.205.40:8085/ODKTEST/formlist--------superadmin------odktest@123#!
-
-
-
-            // $.ajax({ 
-            //     type: "GET", 
-            //     url: 'http://203.129.205.40:8085/ODKTEST/formlist', 
-            //     async: false, 
-            //     dataType: "xml", 
-            //     contentType: "application/xml", 
-            //     crossDomain: true, 
-            //     headers: { 
-            //         "Authorization": "Basic c3VwZXJhZG1pbjpvZGt0ZXN0QDEyMyMh"
-            //     }, 
-            //     success: function (xmlData) { 
-
-            //         console.log(xmlData); 
-
-            //         // $('#getFormAlertDiv').hide(); 
-            //         // $('#waitAlertDiv').show(); 
-
-            //     }, 
-            //     error: function (request, textStatus, errorThrown) { 
-            //         console.log(request.responseText); 
-            //         console.log(textStatus); 
-            //         console.log(errorThrown); 
-            //     } 
-
-            // });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // return $http({
-        //             method: "get",
-        //             url: "http://203.129.205.40:8085/ODKTEST/formlist",
-        //             async: false, 
-        //             dataType: "xml", 
-        //             contentType: "application/xml", 
-        //             crossDomain: true, 
-        //             headers: { 
-        //                 "Authorization": "Basic c3VwZXJhZG1pbiA6IG9ka3Rlc3RAMTIzIyE=" 
-        //             }
-        //         });
-                
-    	// return $http.get("https://opendatakit.appspot.com/formXml?formId=CascadingSelect");
     }
     return factory;
 });

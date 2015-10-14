@@ -58,17 +58,26 @@ $scope.popover;
   
 })
 
-.controller('HomeCtrl', function($scope){
+.controller('HomeCtrl', function($scope, $location, $cordovaToast){
   $scope.header = "SDRC Collect 1.2";
   $scope.paragraph = "Data collection made easier...";  
-  
-
-  
+  $scope.go = function(){
+      if(window.Connection) {
+          if(navigator.connection.type == Connection.NONE || navigator.connection.type == "none") {
+            $cordovaToast.show(notConnected, toastLDuration, toastPosition);    
+          }else{
+            console.log(navigator.connection.type);
+            $location.path("app/getBlankForm");
+          }
+      }
+  }  
 
  })
 
 .controller('GetBlankFormCtrl', function($cordovaToast, $scope, todoFactory, getIdFactory, 
   $rootScope, xformFactory, $location, $ionicLoading,$timeout){
+
+  
 
 $scope.isLoadingHidden = false;
   

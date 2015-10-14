@@ -48,6 +48,7 @@ angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     };
+
     $rootScope.$on('$cordovaPush:tokenReceived', function(event, data) {
       console.log('Got token', data.token, data.platform);
       alert('Got token', data.token, data.platform);
