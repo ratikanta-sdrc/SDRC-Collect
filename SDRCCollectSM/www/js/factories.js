@@ -3,8 +3,8 @@ todoApp.factory('todoFactory', function ($http,$base64) {
     var factory = {};
 	factory.getTodos = function (url) {
     	// return $http.get("http://cdn.rawgit.com/motyar/bcf1d2b36e8777fd77d6/raw/bfa8bc0d2d7990fdb910927815a40b572c0c1078/out.xml");
-    	// return $http.get("http://opendatakit.appspot.com/formList");
-        return $http.get("http://180.87.230.91:8089/ODKAggregate/formList");
+    	return $http.get("http://opendatakit.appspot.com/formList");
+        // return $http.get("http://180.87.230.91:8089/ODKAggregate/formList");
         // return $http.get(url);
         // var time = new Date().getTime();
         // function makeid(vHere)
