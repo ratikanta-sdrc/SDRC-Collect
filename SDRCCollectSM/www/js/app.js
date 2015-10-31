@@ -28,7 +28,7 @@ var serverAuthDB = new PouchDB('serverAuthDB');
 //     alert("sync error");
 //   }
 
-angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 'ngCordova'])
+angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 'ngCordova', 'base64'])
 
 .run(function($ionicPlatform, $rootScope, $ionicHistory) {
   $rootScope.mainTitle = "Main Menu";
@@ -124,6 +124,15 @@ angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 
       }
     })
 
+    .state('app.dHtml', {
+      url: '/dHtml',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/dHtml.html',
+          controller: 'DHtmlController'
+        }
+      }
+    })
   .state('app.generalSetting', {
     url: '/generalSetting',
     views: {

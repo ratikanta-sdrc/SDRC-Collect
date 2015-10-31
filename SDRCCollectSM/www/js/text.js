@@ -1,6 +1,6 @@
 //general setting
 var configurePlatformSettingTitle = 'SERVER SETTING';
-var defaultOdkUrl = "http://opendatakit.appspot.com/formList";
+var defaultOdkUrl = "http://180.87.230.91:8089/ODKAggregate/formList";
 var defaultEnketoUrl = "http://"
 var defaultUsername = "";
 var defaultPassword = "";

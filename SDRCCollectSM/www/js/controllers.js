@@ -200,9 +200,13 @@ $scope.isLoadingHidden = false;
   $timeout(function(){
       todoFactory.getTodos($scope.odkUrl).success(function (data) {
         console.log("data : " + data);
+        // $scope.hide();
+        // $location.path("app/dHtml");
       formsHere = x2js.xml_str2json(data);
+      // console.log(formsHere);
       try{
         $scope.formsHere1 = formsHere.forms.form;
+        console.log($scope.formsHere1);
         $scope.setItems($scope.formsHere1);
       }catch(err){
         console.log(err.message);
@@ -460,6 +464,10 @@ $scope.isLoadingHidden = false;
 
 .controller('AdminSettingCtrl', function($scope, $rootScope) {
   $rootScope.mainTitle = "Admin Setting";
+})
+
+.controller('DHtmlController', function($scope){
+  // $scope.dataHere = gData;
 })
 
 ;
