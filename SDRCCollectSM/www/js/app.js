@@ -9,6 +9,14 @@ var sdrcCollectLog = function(fileName, msg){
   console.log("sdrc_collect_log : " + new Date().toISOString() + " ::: "+ fileName + "\n"+ msg);
 }
 
+var c = function(msg){
+  console.log (msg);
+}
+
+var a = function(msg){
+  alert (msg);
+}
+
 
 var sdrc_collect_db_form = new PouchDB('sdrc_collect_db_form');
 var serverAuthDB = new PouchDB('serverAuthDB');
@@ -28,7 +36,7 @@ var serverAuthDB = new PouchDB('serverAuthDB');
 //     alert("sync error");
 //   }
 
-angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 'ngCordova', 'base64'])
+angular.module('starter', ['ionic','ionic.service.core', 'starter.controllers', 'ngCordova'])
 
 .run(function($ionicPlatform, $rootScope, $ionicHistory) {
   $rootScope.mainTitle = "Main Menu";

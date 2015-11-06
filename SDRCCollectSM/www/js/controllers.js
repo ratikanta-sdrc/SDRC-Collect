@@ -66,8 +66,23 @@ $scope.popover;
           if(navigator.connection.type == Connection.NONE || navigator.connection.type == "none") {
             $cordovaToast.show(notConnected, toastLDuration, toastPosition);    
           }else{
-            console.log(navigator.connection.type);
-            $location.path("app/getBlankForm");
+            serverAuthDB.get('auth').then(function(doc){
+              if(doc.odkUrl != defaultOdkUrl && doc.username != defaultUsername && doc.password != defaultPassword)
+                $location.path("app/getBlankForm");
+              else
+                $cordovaToast.show(invalidCredentials,toastLDuration,toastPosition);        
+            }).catch(function(err){
+                if(err.status == 404){
+                    $cordovaToast.show(invalidCredentials,toastLDuration,toastPosition);
+                }else{
+                  msg = "insert failure! \nError: " + err + "\nError Message: "+ err.message;
+                  sdrcCollectLog('controllers.js', msg);  
+                }
+                
+            });
+
+            // console.log(navigator.connection.type);
+
           }
       }
   }  
@@ -75,7 +90,7 @@ $scope.popover;
  })
 
 .controller('GetBlankFormCtrl', function($cordovaToast, $scope, todoFactory, getIdFactory, 
-  $rootScope, xformFactory, $location, $ionicLoading,$timeout){
+  $rootScope, xformFactory, $location, $ionicLoading, $timeout, $http){
 
   
 
@@ -170,9 +185,93 @@ $scope.isLoadingHidden = false;
     $scope.isLoadingHidden = true;
       
   }
+  /**
+    *The following method will get executed after getting the forms from the server.
+  **/
+  $scope.afterGettingTheFormsFromServer = function (data){
+      formsHere = x2js.xml_str2json(data);
+      try{
+        $scope.formsHere1 = formsHere.forms.form;
+        $scope.setItems($scope.formsHere1);
+      }catch(err){
+        console.log(err.message);
+        $scope.hide();
+        $cordovaToast.show(invalidUrl,'long','center');
+      }
+  };
+  var method = 'GET';
+  var digestURI = '/ODKAggregate/formList';
+
+  function makeid(vHere){
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      for( var i=0; i < vHere; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      return text;
+
+  }
+
+      
+  var nc = '0000000' + makeid(1);  
+  var cnonce = makeid(8);
+    
+  $scope.getRResponse = function (nonce, realm, qop) {
+      var HA1 = CryptoJS.MD5 ($scope.username + ":" + realm + ":" + $scope.password);
+      var HA2 = CryptoJS.MD5 (method + ":" + digestURI);
+      return CryptoJS.MD5 (HA1 + ":" + nonce + ":" + nc + ":"+ cnonce + ":" + qop + ":" + HA2); 
+  }
+
+  $scope.sendRequestForFormsWithHeader = function (nonce, realm, qop){
+     var response = $scope.getRResponse (nonce, realm, qop);
+     var auth = 'Digest username="'+ $scope.username +'", realm="'+realm+'", nonce="'+nonce+'", uri="'+digestURI+'", response="'+response+'", qop='+qop+', nc='+nc+', cnonce="'+cnonce+'"';
+     var config = {
+        headers: {     
+          Authorization: auth
+        }   
+     };
+
+     $http.get($scope.odkUrl, config).
+     success(function(data, status, headers, config) {
+        $scope.afterGettingTheFormsFromServer(data);     
+     })
+     .error(function(data, status, headers, config) {
+        console.log("error");
+      });
+  };
+
+
+
+
+
+  $scope.sendRequestForForms = function (){
+    // c("username : " + $scope.username);
+    $http.get($scope.odkUrl).
+      success(function(data, status, headers, config) {
+        $scope.afterGettingTheFormsFromServer(data);
+      })
+      .error(function(data, status, headers, config) {
+      if(status === 401){
+        var headerHere = headers('WWW-Authenticate');
+        var nonce = headerHere.split('nonce=')[1];
+        nonce = nonce.substring(1, nonce.length - 1);
+        var realm = headerHere.split('realm="')[1];
+        realm = realm.split('"')[0];
+        var qop = headerHere.split('qop="')[1];
+        qop = qop.split('"')[0];
+        $scope.sendRequestForFormsWithHeader(nonce, realm, qop);        
+
+      }else{
+        console.log (status);
+      }
+    });
+
+  };
 
   serverAuthDB.get('auth').then(function(doc){
       $scope.odkUrl = doc.odkUrl;
+      $scope.username = doc.username;
+      $scope.password = doc.password;
+      $scope.sendRequestForForms();
   }).catch(function(err){
       if(err.status == 404){
         serverAuthDB.put({
@@ -197,27 +296,23 @@ $scope.isLoadingHidden = false;
   });
 
   
-  $timeout(function(){
-      todoFactory.getTodos($scope.odkUrl).success(function (data) {
-        console.log("data : " + data);
-        // $scope.hide();
-        // $location.path("app/dHtml");
-      formsHere = x2js.xml_str2json(data);
-      // console.log(formsHere);
-      try{
-        $scope.formsHere1 = formsHere.forms.form;
-        console.log($scope.formsHere1);
-        $scope.setItems($scope.formsHere1);
-      }catch(err){
-        console.log(err.message);
-        $scope.hide();
-        $cordovaToast.show(invalidUrl,'long','center');
-      }      
-                          
-  }).error(function(err){
-      console.log("Error here" + err.message);
-  });  
-  }, 1000);
+
+  
+
+
+
+    
+  
+  // $timeout(function(){
+  //     todoFactory.getForms($scope.odkUrl)
+  //     .success(function (data) {
+  //       $scope.afterGettingTheFormsFromServer(data);           
+  //     })
+  //     .error(function(err){
+  //       console.log("Error here" + err.message);
+  //       console.log("Error here" + err.status);
+  //     });  
+  // }, 1000);
   
 
   $scope.getId = function(urlHere){
@@ -268,28 +363,64 @@ $scope.isLoadingHidden = false;
       if($scope.items[i].checked){
           $scope.iArray.push(i);
           var urlHere = "http://192.168.1.122:8085/transform?xform="+$scope.items[i].url;
-          xformFactory.getXForm(urlHere).success(function (data) {
-              var obj = {
-                _id: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].id,
-                name: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].name,
-                url: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].url,
-                form: data.form
-              };
+          $http.get(urlHere).
+            success(function(data, status, headers, config) {
+              $scope.afterGettingTheFormsFromServer(data);
+            })
+            .error(function(data, status, headers, config) {
+            if(status === 401){
+              var headerHere = headers('WWW-Authenticate');
+              c("headerHere : " + headerHere);
+              var nonce = headerHere.split('nonce=')[1];
+              nonce = nonce.substring(1, nonce.length - 1);
+              var realm = headerHere.split('realm="')[1];
+              realm = realm.split('"')[0];
+              var qop = headerHere.split('qop="')[1];
+              qop = qop.split('"')[0];
+              var response = $scope.getRResponse (nonce, realm, qop);
+              var auth = 'Digest username="'+ $scope.username +'", realm="'+realm+'", nonce="'+nonce+'", uri="'+digestURI+'", response="'+response+'", qop='+qop+', nc='+nc+', cnonce="'+cnonce+'"';
+              console.log ("auth : " + auth);
+              // var config = {
+              //     headers: {     
+              //       Authorization: auth
+              //     }   
+              // };
 
-              sdrc_collect_db_form.put(obj).then(function(){
-                msg = "Insert success! db : sdrc_collect_db_form " + obj.name;
-                sdrcCollectLog('controllers.js', msg);
-                  // console.log(new Date().toISOString() + ":::"+ "Insert success!" + obj);
-              }).catch(function(err){
-                msg = "insert failure! \nError: " + err + "\nError Message: "+ err.message;
-                sdrcCollectLog('controllers.js', msg);
-              });
-              $scope.checkedLengthTwo++;
-              if($scope.checkedLength == $scope.checkedLengthTwo){
-                  $scope.hide();
-                  $location.path("app/home");
-              }              
-          });
+              // $http.get(urlHere, config).
+              //  success(function(data, status, headers, config) {
+              //     $scope.afterGettingTheFormsFromServer(data);     
+              // })
+              // .error(function(data, status, headers, config) {
+              //     console.log("error");
+              // });        
+
+            }else{
+              console.log (status);
+            }
+          });          
+
+          // xformFactory.getXForm(urlHere).success(function (data) {
+          //     var obj = {
+          //       _id: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].id,
+          //       name: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].name,
+          //       url: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].url,
+          //       form: data.form
+          //     };
+
+          //     sdrc_collect_db_form.put(obj).then(function(){
+          //       msg = "Insert success! db : sdrc_collect_db_form " + obj.name;
+          //       sdrcCollectLog('controllers.js', msg);
+          //         // console.log(new Date().toISOString() + ":::"+ "Insert success!" + obj);
+          //     }).catch(function(err){
+          //       msg = "insert failure! \nError: " + err + "\nError Message: "+ err.message;
+          //       sdrcCollectLog('controllers.js', msg);
+          //     });
+          //     $scope.checkedLengthTwo++;
+          //     if($scope.checkedLength == $scope.checkedLengthTwo){
+          //         $scope.hide();
+          //         $location.path("app/home");
+          //     }              
+          // });
       }
     }
     // sync();

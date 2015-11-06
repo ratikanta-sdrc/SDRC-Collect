@@ -1,70 +1,112 @@
 var todoApp = angular.module('todosApp', []);
-todoApp.factory('todoFactory', function ($http,$base64) {
+todoApp.factory('todoFactory', function ($http) {
     var factory = {};
-	factory.getTodos = function (url) {
+    /**
+      *The following method will do the server call without header
+    **/
+	factory.getForms = function (url) {
     	// return $http.get("http://cdn.rawgit.com/motyar/bcf1d2b36e8777fd77d6/raw/bfa8bc0d2d7990fdb910927815a40b572c0c1078/out.xml");
-    	return $http.get("http://opendatakit.appspot.com/formList");
-        // return $http.get("http://180.87.230.91:8089/ODKAggregate/formList");
-        // return $http.get(url);
+    	// return $http.get("http://opendatakit.appspot.com/formList");
+      return $http.get('http://180.87.230.91:8089/ODKAggregate/formList');
+
+        // var username = 'superadmin';
+        // var password = 'aggregate';
+        // var realm = 'ODKAggregate ODK Aggregate';
+        // var method = 'GET';
+        // var digestURI = '/ODKAggregate/formList';
         // var time = new Date().getTime();
-        // function makeid(vHere)
-        // {
-        //     var text = "";
-        //     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        //     for( var i=0; i < vHere; i++ )
-        //         text += possible.charAt(Math.floor(Math.random() * possible.length));
+        // function makeid(vHere){
+        //   var text = "";
+        //   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        //   for( var i=0; i < vHere; i++ )
+        //     text += possible.charAt(Math.floor(Math.random() * possible.length));
+        //   return text;
 
-        //     return text;
         // }
 
-        // var randomString = makeid(20);
-        // var str = time+':'+randomString;
-        // // //$scope.encoded = $base64.encode('a string');
-        // // //$scope.decoded = $base64.decode('YSBzdHJpbmc=');
-
-        // // // console.log($base64.encode(str));
-        // var nonce = $base64.encode(str);
-        // // CryptoJS.MD5("Message");
-        // // var ha1 = $base64.encode('superadmin:ODK Aggregate:aggregate');
-        // var ha1 = CryptoJS.MD5('superadmin:ODK Aggregate:aggregate');
-        // var nc = '0000000' + makeid(1);
+        // var HA1 = CryptoJS.MD5 (username + ":" + realm + ":" + password);
+        // var HA2 = CryptoJS.MD5 (method + ":" + digestURI);    
+        // var nc = '0000000' + makeid(1);  
         // var cnonce = makeid(8);
-        // // var ha2 = $base64.encode('GET:/ODKAggregate/formList');
-        // var ha2 = CryptoJS.MD5('GET:/ODKAggregate/formList');
-        // // var response = $base64.encode(ha1 + ":" + nonce + ":" + ha2);
-        // var response = CryptoJS.MD5(ha1 + ":" + nonce + ":" + ha2);
-        // var config = {
-        //     headers: {
-        //         Authorization: 'Authorization: Digest username="superadmin", realm="ODK Aggregate", nonce="'+nonce+'", uri="/ODKAggregate/formList", response="'+response+'", qop=auth, nc='+nc+', cnonce="'+cnonce+'"'
-        //         // Authorization: 'Authorization: Basic c3VwZXJhZG1pbjphZ2dyZWdhdGU='
-                
-        //     }   
-        // };
-        // // return $http.get('http://203.129.205.40:8085/ODKTEST/formList', config);
-        // // var authdata = $base64.encode('superadmin' + ':' + 'odktest@123#!');
-        // // $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
-        // // $http.get('http://180.87.230.91:8089/ODKAggregate/local_login.html?redirect=http://180.87.230.91:8089/ODKAggregate/formList', config).
-        // $http.get('http://180.87.230.91:8089/ODKAggregate/formList', config).
-        //       success(function(data, status, headers, config) {
-        //         // this callback will be called asynchronously
-        //         // when the response is available
-        //         //console.log("succ");
-        //         console.log("header: " + headers);
-        //         console.log("config: " + config);
-        //         // for(var i = 0; i < config.length; i++){
-        //         //     console.log(config[0]);
-        //         // }
+      
+  
+        // // console.log("nonce : " + nonce);
+        // // console.log("HA1 : " + HA1);
+        // // console.log("HA2 : " + HA2);
+        // // console.log("response : " + response);
+        // // console.log("nc : " + nc);
+        // // console.log("cnonce : " + cnonce);        
 
-        //         console.log("status: " + status);
-        //         console.log("data: " + data);
-        //       })
-        //       .error(function(data, status, headers, config) {
-        //         // called asynchronously if an error occurs
-        //         console.log("fail");
-        //         // or server returns response with an error status.
-        //       });    
+  
+        // var getRResponse = function (nonce) {
+        //     //response=MD5(HA1:nonce:nonceCount:clientNonce:qop:HA2)
+
+        //     return CryptoJS.MD5 (HA1 + ":" + nonce + ":" + nc + ":"+ cnonce + ":" + "auth" + ":" + HA2); 
+        // }
+
+        // var sendItAgain = function (nonce){
+        //    var response = getRResponse (nonce);
+        //    var auth = 'Digest username="'+username+'", realm="'+realm+'", nonce="'+nonce+'", uri="'+digestURI+'", response="'+response+'", qop=auth, nc='+nc+', cnonce="'+cnonce+'"';
+        //    var config = {
+        //       headers: {     
+        //         Authorization: auth
+        //       }   
+        //    };
+
+        //    $http.get('http://180.87.230.91:8089/ODKAggregate/formList', config).
+        //    success(function(data, status, headers, config) {
+        //       // console.log("data: " + data);      
+        //       console.log ("In the second call");
+        //       return data;  
+        //    })
+        //    .error(function(data, status, headers, config) {
+        //       console.log("error");
+        //     });
+        // };
+
+  
+        // $http.get('http://180.87.230.91:8089/ODKAggregate/formList').
+        //   success(function(data, status, headers, config) {
+        //     // console.log("success");
+        //     // console.log("header: " + headers);
+        //     // console.log("config: " + config);
+        //     // console.log("status: " + status);
+        //     // console.log("data: " + data);        
+        //     console.log ("In the first call");
+        //     return data;
+        //   })
+        //   .error(function(data, status, headers, config) {
+        //   if(status === 401){
+        //     var headerHere = headers('WWW-Authenticate');
+        //     var nonce = headerHere.split('nonce=')[1];
+        //     nonce = nonce.substring(1, nonce.length - 1);
+        //     sendItAgain(nonce);        
+        //   }
+           
+        //   // console.log("config: " + config);
+        //   // console.log("status: " + status);
+        //   // console.log("data: " + data);
+        // });  
         
+    },
+    /**
+      *The following method will do server call with the header after getting 
+      *401 (Unutherized error)
+    **/
+    factory.getFormsWithHeader = function (url, authObject) {
+        var username = 'superadmin';
+        var password = 'aggregate';
+        var realm = 'ODKAggregate ODK Aggregate';
+        var method = 'GET';
+        var digestURI = '/ODKAggregate/formList';
+        var auth = 'Digest username="'+username+'", realm="'+realm+'", nonce="'+nonce+'", uri="'+digestURI+'", response="'+response+'", qop=auth, nc='+nc+', cnonce="'+cnonce+'"';
+        var config = {
+            headers: {     
+              Authorization: auth
+            }
+        };
+      return $http.get('http://180.87.230.91:8089/ODKAggregate/formList', config);      
     }
     return factory;
 });
@@ -95,9 +137,7 @@ todoApp.factory('getIdFactory', function() {
 todoApp.factory('xformFactory', function ($http) {
     var factory1 = {};
     factory1.getXForm = function (xformUrl) {
-        // return $http.get("http://cdn.rawgit.com/motyar/bcf1d2b36e8777fd77d6/raw/bfa8bc0d2d7990fdb910927815a40b572c0c1078/out.xml");
-        return $http.get(xformUrl);
-        // return $http.get("https://opendatakit.appspot.com/formXml?formId=CascadingSelect");
+        return $http.get(xformUrl);        
     }
     return factory1;
 });
