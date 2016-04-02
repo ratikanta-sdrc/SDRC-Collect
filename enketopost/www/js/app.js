@@ -24,7 +24,8 @@ app.controller('ctrl',  function($scope, $http){
     
 
     var dataObj = {
-        xform : 'http://180.87.230.91:8089/ODK/formXml?formId=DGA_AWC_20-01-15_v2'
+        // xform : 'http://180.87.230.91:8089/ODK/formXml?formId=DGA_AWC_20-01-15_v2'
+        xform : ''//enter the xml
     };  
     var res = $http.post('http://192.168.1.122:8085/transform', dataObj);
     res.success(function(data, status, headers, config) {

@@ -58,7 +58,7 @@ $scope.popover;
   
 })
 
-.controller('HomeCtrl', function($scope, $location, $cordovaToast){
+.controller('HomeCtrl', function($scope, $location, $cordovaToast, $http, HomeService){
   $scope.header = "SDRC Collect 1.2";
   $scope.paragraph = "Data collection made easier...";  
   $scope.go = function(){
@@ -85,11 +85,46 @@ $scope.popover;
 
           }
       }
-  }  
+  };  
+
+  $scope.submitDemoForm = function (){
+
+    // $http({ 
+    //   method: 'POST',
+    //   url: 'http://180.87.230.91:8089/ODK/submission',
+    //   data: '<Demo_v1 id="Demo_V1" instanceID="uuid:73a56c51-4fde-404e-9f30-4684f148109u" submissionDate="2015-11-13T12:37:52.000+05:30" isComplete="true" markedAsCompleteDate="2015-11-13T12:37:52.000+05:30" xmlns="http://opendatakit.org/submissions"><qs1>ratikanta3</qs1><qs2>bbsr3</qs2><n0:meta xmlns:n0="http://openrosa.org/xforms"><n0:instanceID>uuid:73a56c51-4fde-404e-9f30-4684f148109u</n0:instanceID></n0:meta></Demo_v1>',
+    //   headers: { "Content-Type": 'application/xml' }
+    // })
+    // .success(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    //   })
+    // .error(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    // });
+    var xmlData = HomeService.getXmlData();
+    c(xmlData);
+    // $http({ 
+    //   method: 'POST',
+    //   url: 'http://180.87.230.91:8089/ODK/submission',
+    //   data: '<Demo_v1 id="Demo_V1" instanceID="uuid:73a56c51-4fde-404e-9f30-4684f148109u" submissionDate="2015-11-13T12:37:52.000+05:30" isComplete="true" markedAsCompleteDate="2015-11-13T12:37:52.000+05:30" xmlns="http://opendatakit.org/submissions"><qs1>ratikanta3</qs1><qs2>bbsr3</qs2><n0:meta xmlns:n0="http://openrosa.org/xforms"><n0:instanceID>uuid:73a56c51-4fde-404e-9f30-4684f148109u</n0:instanceID></n0:meta></Demo_v1>',
+    //   headers: { "Content-Type": 'application/xml' }
+    // })
+    // .success(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    //   })
+    // .error(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    // });
+
+  };
 
  })
 
-.controller('GetBlankFormCtrl', function($cordovaToast, $scope, todoFactory, getIdFactory, 
+.controller('GetBlankFormCtrl', function($cordovaToast, $scope, getIdFactory, 
   $rootScope, xformFactory, $location, $ionicLoading, $timeout, $http){
 
   
@@ -351,8 +386,13 @@ $scope.isLoadingHidden = false;
   $scope.checkedLengthTwo = 0;
   $scope.extractedForms = [];
   $scope.iArray = [];
+
+  /**
+    * This method will get called when get selected button of getBlankForm page will get called.
+    * The job of this method is  
+  **/
   $scope.getSelectedForm = function(){
-    $scope.show();
+     $scope.show();
     sdrcCollectLog('controllers.js', "GetBlankFormCtrl controller's getSelectedForm method called");
     for (var i = 0; i < $scope.items.length; i++) {
       if($scope.items[i].checked){
@@ -363,64 +403,28 @@ $scope.isLoadingHidden = false;
       if($scope.items[i].checked){
           $scope.iArray.push(i);
           var urlHere = "http://192.168.1.122:8085/transform?xform="+$scope.items[i].url;
-          $http.get(urlHere).
-            success(function(data, status, headers, config) {
-              $scope.afterGettingTheFormsFromServer(data);
-            })
-            .error(function(data, status, headers, config) {
-            if(status === 401){
-              var headerHere = headers('WWW-Authenticate');
-              c("headerHere : " + headerHere);
-              var nonce = headerHere.split('nonce=')[1];
-              nonce = nonce.substring(1, nonce.length - 1);
-              var realm = headerHere.split('realm="')[1];
-              realm = realm.split('"')[0];
-              var qop = headerHere.split('qop="')[1];
-              qop = qop.split('"')[0];
-              var response = $scope.getRResponse (nonce, realm, qop);
-              var auth = 'Digest username="'+ $scope.username +'", realm="'+realm+'", nonce="'+nonce+'", uri="'+digestURI+'", response="'+response+'", qop='+qop+', nc='+nc+', cnonce="'+cnonce+'"';
-              console.log ("auth : " + auth);
-              // var config = {
-              //     headers: {     
-              //       Authorization: auth
-              //     }   
-              // };
+          xformFactory.getXForm(urlHere).success(function (data) {
+              var obj = {
+                _id: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].id,
+                name: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].name,
+                url: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].url,
+                form: data.form
+              };
 
-              // $http.get(urlHere, config).
-              //  success(function(data, status, headers, config) {
-              //     $scope.afterGettingTheFormsFromServer(data);     
-              // })
-              // .error(function(data, status, headers, config) {
-              //     console.log("error");
-              // });        
-
-            }else{
-              console.log (status);
-            }
-          });          
-
-          // xformFactory.getXForm(urlHere).success(function (data) {
-          //     var obj = {
-          //       _id: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].id,
-          //       name: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].name,
-          //       url: $scope.items[$scope.iArray[$scope.checkedLengthTwo]].url,
-          //       form: data.form
-          //     };
-
-          //     sdrc_collect_db_form.put(obj).then(function(){
-          //       msg = "Insert success! db : sdrc_collect_db_form " + obj.name;
-          //       sdrcCollectLog('controllers.js', msg);
-          //         // console.log(new Date().toISOString() + ":::"+ "Insert success!" + obj);
-          //     }).catch(function(err){
-          //       msg = "insert failure! \nError: " + err + "\nError Message: "+ err.message;
-          //       sdrcCollectLog('controllers.js', msg);
-          //     });
-          //     $scope.checkedLengthTwo++;
-          //     if($scope.checkedLength == $scope.checkedLengthTwo){
-          //         $scope.hide();
-          //         $location.path("app/home");
-          //     }              
-          // });
+              sdrc_collect_db_form.put(obj).then(function(){
+                msg = "Insert success! db : sdrc_collect_db_form " + obj.name;
+                sdrcCollectLog('controllers.js', msg);
+                  // console.log(new Date().toISOString() + ":::"+ "Insert success!" + obj);
+              }).catch(function(err){
+                msg = "insert failure! \nError: " + err + "\nError Message: "+ err.message;
+                sdrcCollectLog('controllers.js', msg);
+              });
+              $scope.checkedLengthTwo++;
+              if($scope.checkedLength == $scope.checkedLengthTwo){
+                  $scope.hide();
+                  $location.path("app/home");
+              }              
+          });
       }
     }
     // sync();
@@ -458,14 +462,42 @@ $scope.isLoadingHidden = false;
   }
 })
 
-.controller('FormCtrl', function($scope, $stateParams){
+.controller('FormCtrl', function($scope, $stateParams, FormService, $http){
+  var form;
   sdrc_collect_db_form.allDocs({include_docs: true, descending: false}).then(function(doc) {
     var myEl = angular.element( document.querySelector( '#header' ) );
-    myEl.after(doc.rows[$stateParams.index].doc.form);      
+    myEl.after(doc.rows[$stateParams.index].doc.form);
+    form = doc.rows[$stateParams.index].doc.form;       
+    
   }).catch(function(err){
     msg = "Database error while fethching record for fill up form.\nError: " + err + "\nError message: " + err.message;
     sdrcCollectLog('controllers.js', msg);
   });  
+  
+
+  $scope.submit = function (){
+
+    var xmlData = FormService.getXmlData(form);
+    // c(xmlData);
+    // $http({ 
+    //   method: 'POST',
+    //   url: 'http://180.87.230.91:8089/ODK/submission',
+    //   data: xmlData,
+    //   headers: { "Content-Type": 'application/xml' }
+    // })
+    // .success(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    //   })
+    // .error(function(data, status, headers, config) {
+    //     c(status);
+    //     c(data);
+    // });
+
+    c(form);
+  };
+
+
 })
 
 .controller('GeneralSettingCtrl', function($scope, $rootScope, $ionicPopup, generaSettingService, $timeout) {
